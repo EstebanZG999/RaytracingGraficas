@@ -102,10 +102,10 @@ pub fn cast_ray(
     ray_origin: &Vec3,
     ray_direction: &Vec3,
     objects: &[Box<dyn RayIntersect>],
-    light: &Light,
+    lights: &Light,
     depth: u32,
 ) -> color::Color {
-    if depth > 3 {
+    if depth > 1 {
         return color::Color::new(4, 12, 36);  // Color de fondo
     }
 
@@ -130,45 +130,55 @@ pub fn cast_ray(
         .material
         .get_diffuse_color(closest_intersection.u, closest_intersection.v);
 
-    // Calcular la dirección de la luz
-    let light_dir = (light.position - closest_intersection.point).normalize();
-    let view_dir = (ray_origin - closest_intersection.point).normalize();
-    let reflect_dir = reflect(&-ray_direction, &closest_intersection.normal).normalize();
-
-    // Calcular la intensidad de la sombra
-    let shadow_intensity = cast_shadow(&closest_intersection, light, objects);
-    let light_intensity = light.intensity * (1.0 - shadow_intensity);
-
-    // Componente difuso usando la ley del coseno de Lambert
-    let diffuse_intensity = closest_intersection
-        .normal
-        .dot(&light_dir)
-        .max(0.0)
-        .min(1.0);
-    let diffuse = color::Color {
-        r: (diffuse_color.r as f32 * closest_intersection.material.albedo[0] * diffuse_intensity * light_intensity).min(255.0) as u8,
-        g: (diffuse_color.g as f32 * closest_intersection.material.albedo[0] * diffuse_intensity * light_intensity).min(255.0) as u8,
-        b: (diffuse_color.b as f32 * closest_intersection.material.albedo[0] * diffuse_intensity * light_intensity).min(255.0) as u8,
+    // Luz ambiental global
+    let ambient_light_intensity = 0.3;  // Ajusta la intensidad según sea necesario
+    let ambient_light = color::Color {
+        r: (diffuse_color.r as f32 * ambient_light_intensity).min(255.0) as u8,
+        g: (diffuse_color.g as f32 * ambient_light_intensity).min(255.0) as u8,
+        b: (diffuse_color.b as f32 * ambient_light_intensity).min(255.0) as u8,
     };
 
+    // Calcular la dirección de la luz y la intensidad difusa usando la ley de Lambert
+    let light_dir = (lights.position - closest_intersection.point).normalize();
+    let diffuse_intensity = closest_intersection.normal.dot(&light_dir).max(0.0).min(1.0);
+
+    // Componente difusa
+    let diffuse = color::Color {
+        r: (diffuse_color.r as f32 * closest_intersection.material.albedo[0] * diffuse_intensity * lights.intensity).min(255.0) as u8,
+        g: (diffuse_color.g as f32 * closest_intersection.material.albedo[0] * diffuse_intensity * lights.intensity).min(255.0) as u8,
+        b: (diffuse_color.b as f32 * closest_intersection.material.albedo[0] * diffuse_intensity * lights.intensity).min(255.0) as u8,
+    };
+
+    // Calcular la intensidad de la sombra
+    let shadow_intensity = cast_shadow(&closest_intersection, lights, objects);
+    let light_intensity = lights.intensity * (1.0 - shadow_intensity);
+
     // Componente especular usando el modelo de Phong
+    let view_dir = (ray_origin - closest_intersection.point).normalize();
+    let reflect_dir = reflect(&-ray_direction, &closest_intersection.normal).normalize();
     let specular_intensity = view_dir
         .dot(&reflect_dir)
         .max(0.0)
         .powf(closest_intersection.material.specular);
     let specular = color::Color {
-        r: (light.color.r as f32 * closest_intersection.material.albedo[1] * specular_intensity * light_intensity).min(255.0) as u8,
-        g: (light.color.g as f32 * closest_intersection.material.albedo[1] * specular_intensity * light_intensity).min(255.0) as u8,
-        b: (light.color.b as f32 * closest_intersection.material.albedo[1] * specular_intensity * light_intensity).min(255.0) as u8,
+        r: (lights.color.r as f32 * closest_intersection.material.albedo[1] * specular_intensity * light_intensity).min(255.0) as u8,
+        g: (lights.color.g as f32 * closest_intersection.material.albedo[1] * specular_intensity * light_intensity).min(255.0) as u8,
+        b: (lights.color.b as f32 * closest_intersection.material.albedo[1] * specular_intensity * light_intensity).min(255.0) as u8,
+    };
+
+    // Suma de la luz ambiental, difusa y especular
+    let final_color = color::Color {
+        r: (ambient_light.r as u32 + diffuse.r as u32 + specular.r as u32).min(255) as u8,
+        g: (ambient_light.g as u32 + diffuse.g as u32 + specular.g as u32).min(255) as u8,
+        b: (ambient_light.b as u32 + diffuse.b as u32 + specular.b as u32).min(255) as u8,
     };
 
     // Componente de reflexión
-    let mut reflect_color = color::Color::new(0, 0, 0);
     let reflectivity = closest_intersection.material.albedo[2];
+    let mut reflect_color = color::Color::new(0, 0, 0);
     if reflectivity > 0.0 {
         let reflect_origin = closest_intersection.point + closest_intersection.normal * 1e-3;
-        reflect_color = cast_ray(&reflect_origin, &reflect_dir, objects, light, depth + 1);
-
+        reflect_color = cast_ray(&reflect_origin, &reflect_dir, objects, lights, depth + 1);
         reflect_color = color::Color {
             r: (reflect_color.r as f32 * reflectivity).min(255.0) as u8,
             g: (reflect_color.g as f32 * reflectivity).min(255.0) as u8,
@@ -177,13 +187,12 @@ pub fn cast_ray(
     }
 
     // Componente de refracción
-    let mut refract_color = color::Color::new(0, 0, 0);
     let transparency = closest_intersection.material.albedo[3];
+    let mut refract_color = color::Color::new(0, 0, 0);
     if transparency > 0.0 {
         let refract_dir = refract(&ray_direction, &closest_intersection.normal, closest_intersection.material.refractive_index).normalize();
         let refract_origin = closest_intersection.point + closest_intersection.normal * 1e-3;  // Evitar acné de sombras
-        refract_color = cast_ray(&refract_origin, &refract_dir, objects, light, depth + 1);
-
+        refract_color = cast_ray(&refract_origin, &refract_dir, objects, lights, depth + 1);
         refract_color = color::Color {
             r: (refract_color.r as f32 * transparency).min(255.0) as u8,
             g: (refract_color.g as f32 * transparency).min(255.0) as u8,
@@ -191,13 +200,14 @@ pub fn cast_ray(
         };
     }
 
-    // Combinar los componentes difuso, especular, reflejado y refractado
+    // Combinar difusa, especular, reflejada y refractada
     color::Color {
-        r: ((diffuse.r as f32 * (1.0 - reflectivity - transparency)) + (reflect_color.r as f32 * reflectivity) + (refract_color.r as f32 * transparency)).min(255.0) as u8,
-        g: ((diffuse.g as f32 * (1.0 - reflectivity - transparency)) + (reflect_color.g as f32 * reflectivity) + (refract_color.g as f32 * transparency)).min(255.0) as u8,
-        b: ((diffuse.b as f32 * (1.0 - reflectivity - transparency)) + (reflect_color.b as f32 * reflectivity) + (refract_color.b as f32 * transparency)).min(255.0) as u8,
+        r: ((final_color.r as f32 * (1.0 - reflectivity - transparency)) + (reflect_color.r as f32 * reflectivity) + (refract_color.r as f32 * transparency)).min(255.0) as u8,
+        g: ((final_color.g as f32 * (1.0 - reflectivity - transparency)) + (reflect_color.g as f32 * reflectivity) + (refract_color.g as f32 * transparency)).min(255.0) as u8,
+        b: ((final_color.b as f32 * (1.0 - reflectivity - transparency)) + (reflect_color.b as f32 * reflectivity) + (refract_color.b as f32 * transparency)).min(255.0) as u8,
     }
 }
+
 
 
 
@@ -208,27 +218,39 @@ pub fn render(
     height: usize, 
     objects: &[Box<dyn RayIntersect>], 
     camera: &Camera, 
-    light: &Light
+    lights: &[Light]
 ) {
-    // Reemplazamos `par_chunks_mut` con un bucle tradicional sobre las filas
-    for (y, row) in framebuffer.chunks_mut(width).enumerate() {
-        let screen_y = -((2.0 * y as f32) / height as f32 - 1.0);
-
-        // Iteramos secuencialmente sobre los píxeles de la fila
-        for (x, pixel) in row.iter_mut().enumerate() {
-            let screen_x = (2.0 * x as f32) / width as f32 - 1.0;
-            let screen_x = screen_x * (width as f32 / height as f32);
-
-            let ray_direction = nalgebra_glm::normalize(&Vec3::new(screen_x, screen_y, -1.0));
-            let transformed_direction = camera.basis_change(&ray_direction);
-            let pixel_color = cast_ray(&camera.eye, &transformed_direction, objects, light, 0);
-
-            *pixel = ((pixel_color.r as u32) << 16)
-                | ((pixel_color.g as u32) << 8)
-                | (pixel_color.b as u32);
+    let chunk_size = 8;  // Tamaño de bloque para procesar en paralelo
+    framebuffer.par_chunks_mut(width * chunk_size).enumerate().for_each(|(chunk_idx, chunk)| {
+        let base_y = chunk_idx * chunk_size;
+    
+        for (y, row) in chunk.chunks_mut(width).enumerate() {
+            let screen_y = -((2.0 * (base_y + y) as f32) / height as f32 - 1.0);
+    
+            row.iter_mut().enumerate().for_each(|(x, pixel)| {
+                let screen_x = (2.0 * x as f32) / width as f32 - 1.0;
+                let screen_x = screen_x * (width as f32 / height as f32);
+    
+                let ray_direction = nalgebra_glm::normalize(&Vec3::new(screen_x, screen_y, -1.0));
+                let transformed_direction = camera.basis_change(&ray_direction);
+    
+                let pixel_color = lights.iter().fold(color::Color::new(0, 0, 0), |acc, light| {
+                    let light_color = cast_ray(&camera.eye, &transformed_direction, objects, light, 0);
+                    color::Color {
+                        r: (acc.r as u32 + light_color.r as u32).min(255) as u8,
+                        g: (acc.g as u32 + light_color.g as u32).min(255) as u8,
+                        b: (acc.b as u32 + light_color.b as u32).min(255) as u8,
+                    }
+                });
+    
+                *pixel = ((pixel_color.r as u32) << 16)
+                    | ((pixel_color.g as u32) << 8)
+                    | (pixel_color.b as u32);
+            });
         }
-    }
+    });    
 }
+
 
 
 
@@ -251,11 +273,11 @@ fn main() {
     let mut camera = Camera { eye, center, up };
 
     // Inicializar la luz
-    let light = Light::new(
-        Vec3::new(5.0, 5.0, 5.0),
-        color::Color::new(255, 255, 255),
-        1.0,
-    );
+    let lights = vec![
+        Light::new(Vec3::new(5.0, 5.0, 5.0), color::Color::new(255, 255, 255), 0.8),  // Luz principal
+
+    ];
+    
 
     // Definir los materiales 
     let tierra_material = material::Material {
@@ -337,19 +359,19 @@ fn main() {
         }
 
         if camera_moved {
-            render(&mut framebuffer_low, width / 2, height / 2, &objects, &camera, &light);
+            render(&mut framebuffer_low, width / 4, height / 4, &objects, &camera, &lights[..]);
             let scaled_framebuffer = upscale_framebuffer(
                 &framebuffer_low,
-                width / 2,
-                height / 2,
+                width / 4,
+                height / 4,
                 width,
                 height,
             );
             window.update_with_buffer(&scaled_framebuffer, width, height).unwrap();
         } else if should_render {
-            render(&mut framebuffer_high, width, height, &objects, &camera, &light);
+            render(&mut framebuffer_high, width, height, &objects, &camera, &lights);
             window.update_with_buffer(&framebuffer_high, width, height).unwrap();
-            should_render = false;
+            should_render = true;
         } else {
             window.update();
         }

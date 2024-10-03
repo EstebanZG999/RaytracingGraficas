@@ -5,6 +5,6 @@ edition = "2021"
 
 [dependencies]
 nalgebra-glm = "0.19.0" 
-minifb = "0.15.0"
+minifb = "0.27.0"
 rayon = "1.10.0"
 image = "0.25.2"
