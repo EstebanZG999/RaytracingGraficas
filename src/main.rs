@@ -25,9 +25,11 @@ fn load_texture(filename: &str) -> Texture {
     let (width, height) = img.dimensions();
     let mut data = Vec::new();
 
-    for pixel in img.pixels() {
-        let rgba = pixel.2;
-        data.push(Color::new(rgba[0], rgba[1], rgba[2]));
+    for y in (0..height).rev() {  // Flip vertically
+        for x in 0..width {
+            let pixel = img.get_pixel(x, y);
+            data.push(Color::new(pixel[0], pixel[1], pixel[2]));
+        }
     }
 
     Texture { width: width as usize, height: height as usize, data }
@@ -265,6 +267,7 @@ fn main() {
     // Cargar las texturas desde archivos PNG
     let grama_texture = load_texture("textures/grama.png");
     let tierra_texture = load_texture("textures/tierra2.png");
+    let tierra4_texture = load_texture("textures/tierra4.jpeg");
 
     // Inicializar la cámara
     let eye = Vec3::new(0.0, 0.0, 5.0);
@@ -289,6 +292,15 @@ fn main() {
         texture: Some(tierra_texture),
     };
 
+    let tierra_material4 = material::Material {
+        diffuse: color::Color::new(255, 255, 255),
+        specular: 50.0,
+        albedo: [0.6, 0.3, 0.1, 0.1],
+        refractive_index: 1.5,
+        has_texture: true,
+        texture: Some(tierra4_texture),
+    };
+
     let grama_material = material::Material {
         diffuse: color::Color::new(255, 255, 255),
         specular: 50.0,
@@ -308,18 +320,34 @@ fn main() {
     };
 
     // Crear un cubo con materiales para cada cara
-    let cube = Cube::new(
-        Vec3::new(0.0, 0.0, -1.0), // Centro del cubo
-        2.0, // Tamaño del cubo
-        [   // Materiales para las 6 caras del cubo
-            tierra_material.clone(), tierra_material.clone(), // Front, Back
-            tierra_material.clone(), tierra_material.clone(), // Left, Right
-            grama_material.clone(), empty_material.clone(),   // Top, Bottom
+    let cube = Box::new(Cube {
+        center: Vec3::new(0.0, -0.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
         ],
-    );
+    });
 
+    // Crear un cubo adicional al lado derecho del cubo existente
+    let second_cube = Box::new(Cube {
+        center: Vec3::new(2.0, 0.0, 0.0),  // Posicionamos el cubo 2 unidades a la derecha del primero
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
     // Crear una lista de objetos con el cubo
-    let objects: Vec<Box<dyn RayIntersect>> = vec![Box::new(cube)];
+    let objects: Vec<Box<dyn RayIntersect>> = vec![cube, second_cube];
 
     // Ciclo principal del renderizado
     let mut framebuffer_high = vec![0; width * height];
@@ -340,7 +368,8 @@ fn main() {
 
     while window.is_open() && !window.is_key_down(minifb::Key::Escape) {
         camera_moved = false;
-
+    
+        // Manejo de teclas de flecha para la órbita
         if window.is_key_down(minifb::Key::Left) {
             camera.orbit(0.05, 0.0);
             camera_moved = true;
@@ -355,6 +384,46 @@ fn main() {
         }
         if window.is_key_down(minifb::Key::Down) {
             camera.orbit(0.0, -0.05);
+            camera_moved = true;
+        }
+    
+        // Manejo de teclas WASD para movimiento
+        let mut forward = 0.0;
+        let mut rightward = 0.0;
+        let mut vertical = 0.0;
+    
+        // Movimiento hacia adelante y hacia atrás (W/S)
+        if window.is_key_down(minifb::Key::W) {
+            forward += 0.1;
+        }
+        if window.is_key_down(minifb::Key::S) {
+            forward -= 0.1;
+        }
+    
+        // Movimiento lateral (A/D)
+        if window.is_key_down(minifb::Key::A) {
+            rightward -= 0.1;
+        }
+        if window.is_key_down(minifb::Key::D) {
+            rightward += 0.1;
+        }
+    
+        // Movimiento vertical (Q/E o puedes usar otras teclas)
+        if window.is_key_down(minifb::Key::Q) {
+            vertical += 0.1;
+        }
+        if window.is_key_down(minifb::Key::E) {
+            vertical -= 0.1;
+        }
+    
+        // Aplicar movimiento de la cámara
+        if forward != 0.0 || rightward != 0.0 {
+            camera.move_camera(forward, rightward);
+            camera_moved = true;
+        }
+    
+        if vertical != 0.0 {
+            camera.move_vertical(vertical);
             camera_moved = true;
         }
 

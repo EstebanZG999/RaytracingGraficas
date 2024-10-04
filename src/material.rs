@@ -14,12 +14,12 @@ pub struct Material {
 impl Material {
     pub fn get_diffuse_color(&self, u: f32, v: f32) -> Color {
         if let Some(texture) = &self.texture {
-            // Mapear UV a las dimensiones de la textura
-            let x = (u * (texture.width as f32 - 1.0)) as usize;
-            let y = (v * (texture.height as f32 - 1.0)) as usize;
-            texture.get_color(x, y)
+            let tex_x = (u * (texture.width as f32)) as usize % texture.width;
+            let tex_y = ((1.0 - v) * (texture.height as f32)) as usize % texture.height;
+            let pixel = texture.data[tex_y * texture.width + tex_x];
+            Color::new(pixel.r, pixel.g, pixel.b)
         } else {
-            self.diffuse
+            self.diffuse.clone()
         }
     }
 
