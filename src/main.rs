@@ -266,8 +266,9 @@ fn main() {
 
     // Cargar las texturas desde archivos PNG
     let grama_texture = load_texture("textures/grama.png");
-    let tierra_texture = load_texture("textures/tierra2.png");
-    let tierra4_texture = load_texture("textures/tierra4.jpeg");
+    let tierra_texture = load_texture("textures/tierraG.jpeg");
+    let tierra4_texture = load_texture("textures/tierra.jpeg");
+    let arena_texture = load_texture("textures/arena.jpeg");
 
     // Inicializar la cámara
     let eye = Vec3::new(0.0, 0.0, 5.0);
@@ -310,18 +311,45 @@ fn main() {
         texture: Some(grama_texture),
     };
 
-    let empty_material = material::Material {
-        diffuse: color::Color::new(0, 0, 0),
+    let arena = material::Material {
+        diffuse: color::Color::new(255, 255, 255),
         specular: 50.0,
         albedo: [0.6, 0.3, 0.1, 0.1],
         refractive_index: 1.5,
-        has_texture: false,
-        texture: None,
+        has_texture: true,
+        texture: Some(arena_texture),
     };
 
+
     // Crear un cubo con materiales para cada cara
-    let cube = Box::new(Cube {
-        center: Vec3::new(0.0, -0.0, 0.0),  // Posición del cubo en el espacio
+    let floor = Box::new(Cube {
+        center: Vec3::new(0.0, 0.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor1 = Box::new(Cube {
+        center: Vec3::new(0.0, 2.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor11 = Box::new(Cube {
+        center: Vec3::new(0.0, 4.0, 0.0),  // Posición del cubo en el espacio
         size: 2.0,                         // Tamaño del cubo
         materials: [
             tierra_material.clone(),  // Derecha (X+)
@@ -334,8 +362,34 @@ fn main() {
     });
 
     // Crear un cubo adicional al lado derecho del cubo existente
-    let second_cube = Box::new(Cube {
+    let floor2 = Box::new(Cube {
         center: Vec3::new(2.0, 0.0, 0.0),  // Posicionamos el cubo 2 unidades a la derecha del primero
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor22 = Box::new(Cube {
+        center: Vec3::new(2.0, 2.0, 0.0),  // Posicionamos el cubo 2 unidades a la derecha del primero
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor222 = Box::new(Cube {
+        center: Vec3::new(2.0, 4.0, 0.0),  // Posicionamos el cubo 2 unidades a la derecha del primero
         size: 2.0,                         // Tamaño del cubo
         materials: [
             tierra_material.clone(),  // Derecha (X+)
@@ -346,8 +400,423 @@ fn main() {
             tierra_material.clone()   // Atrás (Z-)
         ],
     });
+
+
+    let floor3 = Box::new(Cube {
+        center: Vec3::new(0.0, 0.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor33 = Box::new(Cube {
+        center: Vec3::new(0.0, 2.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor333 = Box::new(Cube {
+        center: Vec3::new(0.0, 4.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+
+    let floor4 = Box::new(Cube {
+        center: Vec3::new(2.0, 0.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor44 = Box::new(Cube {
+        center: Vec3::new(2.0, 2.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor444 = Box::new(Cube {
+        center: Vec3::new(2.0, 4.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor5 = Box::new(Cube {
+        center: Vec3::new(0.0, 0.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor55 = Box::new(Cube {
+        center: Vec3::new(0.0, 2.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor555 = Box::new(Cube {
+        center: Vec3::new(0.0, 4.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor6 = Box::new(Cube {
+        center: Vec3::new(4.0, 0.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor66 = Box::new(Cube {
+        center: Vec3::new(4.0, 2.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor666 = Box::new(Cube {
+        center: Vec3::new(4.0, 4.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+
+    let floor7 = Box::new(Cube {
+        center: Vec3::new(2.0, 0.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor77 = Box::new(Cube {
+        center: Vec3::new(2.0, 2.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor8 = Box::new(Cube {
+        center: Vec3::new(4.0, 0.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor88 = Box::new(Cube {
+        center: Vec3::new(4.0, 2.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor9 = Box::new(Cube {
+        center: Vec3::new(6.0, 0.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor99 = Box::new(Cube {
+        center: Vec3::new(6.0, 2.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+
+    let floor10 = Box::new(Cube {
+        center: Vec3::new(0.0, 0.0, -6.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material4.clone(),  // Derecha (X+)
+            tierra_material4.clone(),  // Izquierda (X-)
+            tierra_material4.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material4.clone(),  // Frente (Z+)
+            tierra_material4.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor1010 = Box::new(Cube {
+        center: Vec3::new(0.0, 2.0, -6.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floorII = Box::new(Cube {
+        center: Vec3::new(0.0, 0.0, -8.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let floor12 = Box::new(Cube {
+        center: Vec3::new(8.0, 0.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            tierra_material.clone(),  // Derecha (X+)
+            tierra_material.clone(),  // Izquierda (X-)
+            grama_material.clone(),        // Arriba (Y+)
+            tierra_material4.clone(),         // Abajo (Y-)
+            tierra_material.clone(),  // Frente (Z+)
+            tierra_material.clone()   // Atrás (Z-)
+        ],
+    });
+
+
+    let arena1 = Box::new(Cube {
+        center: Vec3::new(6.0, 0.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena11 = Box::new(Cube {
+        center: Vec3::new(6.0, 2.0, -2.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena2 = Box::new(Cube {
+        center: Vec3::new(2.0, 0.0, -6.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena22 = Box::new(Cube {
+        center: Vec3::new(2.0, 2.0, -6.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena3 = Box::new(Cube {
+        center: Vec3::new(4.0, 0.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena33 = Box::new(Cube {
+        center: Vec3::new(4.0, 2.0, -4.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena4 = Box::new(Cube {
+        center: Vec3::new(0.0, 0.0, -10.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+    let arena5 = Box::new(Cube {
+        center: Vec3::new(10.0, 0.0, 0.0),  // Posición del cubo en el espacio
+        size: 2.0,                         // Tamaño del cubo
+        materials: [
+            arena.clone(),  // Derecha (X+)
+            arena.clone(),  // Izquierda (X-)
+            arena.clone(),        // Arriba (Y+)
+            arena.clone(),         // Abajo (Y-)
+            arena.clone(),  // Frente (Z+)
+            arena.clone()   // Atrás (Z-)
+        ],
+    });
+
+
     // Crear una lista de objetos con el cubo
-    let objects: Vec<Box<dyn RayIntersect>> = vec![cube, second_cube];
+    let objects: Vec<Box<dyn RayIntersect>> = vec![
+        floor, floor1, floor11, 
+        floor2, floor22, floor222,
+        floor3, floor33, floor333,
+        floor4, floor44, floor444,
+        floor5, floor55, floor555,
+        floor6, floor66, floor666,
+        floor7, floor77,
+        floor8, floor88,
+        floor9, floor99,
+        floor10, floor1010,
+        floorII, 
+        floor12,
+        arena1, arena11, 
+        arena2, arena22,
+        arena3, arena33,
+        arena4,
+        arena5,];
+
 
     // Ciclo principal del renderizado
     let mut framebuffer_high = vec![0; width * height];
