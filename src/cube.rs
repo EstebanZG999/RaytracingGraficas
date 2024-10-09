@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use nalgebra_glm::Vec3;
 use crate::intersect::{Intersect, RayIntersect}; // Cambiado de ray_intersect a intersect
 use crate::material::Material; // Cambiado de ray_intersect a material
@@ -6,6 +8,8 @@ pub struct Cube {
     pub center: Vec3,
     pub size: f32,
     pub materials: [Material; 6], 
+    pub original_center: Vec3,  // Nuevo campo para almacenar la posición original  
+    pub is_water: bool,         // Nuevo campo para identificar si es un cubo de agua
 }
 
 impl Cube {
@@ -94,5 +98,9 @@ impl RayIntersect for Cube {
             u,
             v
         )
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }

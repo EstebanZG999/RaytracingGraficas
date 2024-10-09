@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use nalgebra_glm::Vec3;
 use crate::material::Material;
 
@@ -41,4 +43,5 @@ impl Intersect {
 
 pub trait RayIntersect: Sync {
     fn ray_intersect(&self, ray_origin: &Vec3, ray_direction: &Vec3) -> Intersect;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
 }
